@@ -1,6 +1,7 @@
 package lite.httpsupport;
 
 import lite.httpsupport.codec.ICodec;
+import lite.httpsupport.impl.Request;
 import lite.httpsupport.impl.ThreadMode;
 import lite.httpsupport.log.ILogger;
 import lite.httpsupport.url.IUrlGenerator;
@@ -50,6 +51,14 @@ public interface IHttpSupport {
     /**
      * 发送 post 请求
      * 
+     * @param request
+     * @param listener
+     */
+    <RESP> void post(final Request request, final IHttpListener<RESP> listener);
+
+    /**
+     * 发送 post 请求
+     * 
      * @param cmd
      * @param data
      * @param clz
@@ -69,6 +78,14 @@ public interface IHttpSupport {
      */
     <RESP> void postJson(final String cmd, final Object data,
             final Class<?> clz, final IHttpListener<RESP> listener);
+
+    /**
+     * 发送 get 请求
+     * 
+     * @param request
+     * @param listener
+     */
+    <RESP> void get(final Request request, final IHttpListener<RESP> listener);
 
     /**
      * 发送 get 请求

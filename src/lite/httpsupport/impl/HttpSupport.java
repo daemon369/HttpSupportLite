@@ -85,8 +85,18 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
+    public <RESP> void post(Request request, IHttpListener<RESP> listener) {
+
+        final HttpTask<RESP> task = new PostTask<RESP>().setRequest(request)
+                .setHttpListener(listener);
+        getExecutor().execute(task);
+    }
+
+    @Override
     public <RESP> void postJson(String cmd, Object data, final Class<?> clz,
             IHttpListener<RESP> listener) {
+        check();
+
         final JsonRequest request = new JsonRequest();
         request.setClz(clz);
         request.setThreadMode(threadMode);
@@ -103,6 +113,8 @@ public class HttpSupport implements IHttpSupport {
     @Override
     public <RESP> void post(String cmd, Object data, final Class<?> clz,
             ICodec codec, IHttpListener<RESP> listener) {
+        check();
+
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
@@ -140,16 +152,45 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public <RESP> void get(String cmd, Class<?> clz, ICodec codec,
-            IHttpListener<RESP> listener) {
+    public <RESP> void get(Request request, IHttpListener<RESP> listener) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
+    public <RESP> void get(String cmd, Class<?> clz, ICodec codec,
+            IHttpListener<RESP> listener) {
+        check();
+
+        final Request request = new Request();
+        request.setCodec(codec);
+        request.setClz(clz);
+        request.setThreadMode(threadMode);
+        request.setUrl(urlGenerator.toUrl(cmd));
+        request.setRetry(retry);
+        request.setMaxRetryTimes(maxRetryTimes);
+
+        get(request, listener);
+    }
+
+    @Override
     public <RESP> void getByUrl(String url, Class<?> clz, ICodec codec,
             IHttpListener<RESP> listener) {
-        // TODO Auto-generated method stub
+        final Request request = new Request();
+        request.setCodec(codec);
+        request.setClz(clz);
+        request.setThreadMode(threadMode);
+        request.setUrl(url);
+        request.setRetry(retry);
+        request.setMaxRetryTimes(maxRetryTimes);
 
+        get(request, listener);
+    }
+
+    private void check() {
+        if (null == urlGenerator) {
+            throw new IllegalStateException(
+                    "URL 产生器不能为空，请调用 setUrlGenerator 方法设置");
+        }
     }
 }
