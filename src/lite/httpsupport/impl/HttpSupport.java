@@ -153,14 +153,20 @@ public class HttpSupport implements IHttpSupport {
 
     @Override
     public <RESP> void get(Request request, IHttpListener<RESP> listener) {
-        // TODO Auto-generated method stub
 
+        final HttpTask<RESP> task = new GetTask<RESP>().setRequest(request)
+                .setHttpListener(listener);
+        getExecutor().execute(task);
     }
 
     @Override
     public <RESP> void get(String cmd, Class<?> clz, ICodec codec,
             IHttpListener<RESP> listener) {
         check();
+
+        if (null == clz || null == codec) {
+            throw new IllegalArgumentException("参数错误");
+        }
 
         final Request request = new Request();
         request.setCodec(codec);
