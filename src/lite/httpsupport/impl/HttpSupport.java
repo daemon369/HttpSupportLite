@@ -1,10 +1,8 @@
 package lite.httpsupport.impl;
 
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import lite.httpsupport.IHttpListener;
 import lite.httpsupport.IHttpSupport;
@@ -135,28 +133,6 @@ public class HttpSupport implements IHttpSupport {
         final HttpTask<RESP> task = new PostTask<RESP>().setRequest(request)
                 .setHttpListener(listener);
         getExecutor().execute(task);
-    }
-
-    static class MyThreadFactory implements ThreadFactory {
-
-        private static final AtomicInteger poolNumber = new AtomicInteger(1);
-
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix;
-
-        MyThreadFactory() {
-            namePrefix = "pool-" + poolNumber.getAndIncrement() + "-thread-";
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            final Thread t = new Thread(r, namePrefix
-                    + threadNumber.getAndIncrement());
-            if (t.isDaemon()) {
-                t.setDaemon(false);
-            }
-            return t;
-        }
     }
 
     @Override
