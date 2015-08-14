@@ -1,14 +1,21 @@
 package lite.httpsupport.impl;
 
-import lite.httpsupport.IHttpSupport;
 import lite.httpsupport.log.ILogger;
+import lite.httpsupport.log.ILogger.Level;
 
 final class LogUtils {
     private static ILogger logger = null;
     private static DefaultLogger defaultLogger = null;
 
+    public static boolean debug = false;
+    public static Level logLevel = Level.VERBOSE;
+
     static void setLogger(final ILogger logger) {
         LogUtils.logger = logger;
+    }
+
+    static void setLogLevel(final Level level) {
+        LogUtils.logLevel = level;
     }
 
     private static ILogger getDefaultLogger() {
@@ -19,8 +26,6 @@ final class LogUtils {
                 }
             }
         }
-
-        defaultLogger.setDebug(IHttpSupport.debug);
 
         return defaultLogger;
     }

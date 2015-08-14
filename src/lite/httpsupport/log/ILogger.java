@@ -1,6 +1,11 @@
 package lite.httpsupport.log;
 
 public interface ILogger {
+    enum Level {
+        VERBOSE, DEBUG, INFO, WARN, ERROR, ASSET, NONE
+    }
+
+    Level getLogLevel();
 
     void v(String tag, String msg);
 

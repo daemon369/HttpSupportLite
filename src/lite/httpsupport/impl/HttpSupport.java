@@ -8,6 +8,7 @@ import lite.httpsupport.IHttpListener;
 import lite.httpsupport.IHttpSupport;
 import lite.httpsupport.codec.ICodec;
 import lite.httpsupport.log.ILogger;
+import lite.httpsupport.log.ILogger.Level;
 import lite.httpsupport.url.IUrlGenerator;
 
 public class HttpSupport implements IHttpSupport {
@@ -21,6 +22,7 @@ public class HttpSupport implements IHttpSupport {
     private volatile static HttpSupport instance = null;
     private volatile ThreadPoolExecutor executor = null;
 
+    private boolean debug = false;
     private ThreadMode threadMode = ThreadMode.Default;
     private IUrlGenerator urlGenerator = null;
 
@@ -55,6 +57,17 @@ public class HttpSupport implements IHttpSupport {
         }
 
         return executor;
+    }
+
+    @Override
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+        LogUtils.debug = debug;
+    }
+
+    @Override
+    public void setLogLevel(Level level) {
+        LogUtils.setLogLevel(level);
     }
 
     @Override

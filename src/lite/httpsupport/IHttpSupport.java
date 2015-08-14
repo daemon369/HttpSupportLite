@@ -4,11 +4,14 @@ import lite.httpsupport.codec.ICodec;
 import lite.httpsupport.impl.Request;
 import lite.httpsupport.impl.ThreadMode;
 import lite.httpsupport.log.ILogger;
+import lite.httpsupport.log.ILogger.Level;
 import lite.httpsupport.url.IUrlGenerator;
 
 public interface IHttpSupport {
 
-    public static boolean debug = false;
+    void setDebug(final boolean debug);
+
+    void setLogLevel(final Level level);
 
     /**
      * 设置自定义 logger
