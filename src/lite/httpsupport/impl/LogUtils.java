@@ -8,7 +8,8 @@ final class LogUtils {
     private static DefaultLogger defaultLogger = null;
 
     public static boolean debug = false;
-    public static Level logLevel = Level.VERBOSE;
+    public static final Level DEFAULT_LOG_LEVEL = Level.WARN;
+    private static Level logLevel = Level.DEBUG;
 
     static void setLogger(final ILogger logger) {
         LogUtils.logger = logger;
@@ -16,6 +17,14 @@ final class LogUtils {
 
     static void setLogLevel(final Level level) {
         LogUtils.logLevel = level;
+    }
+
+    static Level getLogLevel() {
+        if (null == LogUtils.logLevel) {
+            return DEFAULT_LOG_LEVEL;
+        }
+
+        return LogUtils.logLevel;
     }
 
     private static ILogger getDefaultLogger() {

@@ -5,8 +5,6 @@ public interface ILogger {
         VERBOSE, DEBUG, INFO, WARN, ERROR, ASSET, NONE
     }
 
-    Level getLogLevel();
-
     void v(String tag, String msg);
 
     void v(String tag, String msg, Throwable tr);

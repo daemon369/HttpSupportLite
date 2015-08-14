@@ -1,22 +1,11 @@
 package lite.httpsupport.impl;
 
 import static lite.httpsupport.impl.LogUtils.debug;
-import static lite.httpsupport.impl.LogUtils.logLevel;
-import static lite.httpsupport.impl.LogUtils.setLogLevel;
-
+import static lite.httpsupport.impl.LogUtils.getLogLevel;
 import lite.httpsupport.log.ILogger;
 import android.util.Log;
 
 class DefaultLogger implements ILogger {
-
-    @Override
-    public Level getLogLevel() {
-        if (null == logLevel) {
-            setLogLevel(Level.VERBOSE);
-        }
-
-        return logLevel;
-    }
 
     @Override
     public void v(String tag, String msg) {
