@@ -86,6 +86,8 @@ public class HttpSupport implements IHttpSupport {
 
     @Override
     public <RESP> void post(Request request, IHttpListener<RESP> listener) {
+        check(null == request || null == request.clz || null == request.codec
+                || null == request.url);
 
         final HttpTask<RESP> task = new PostTask<RESP>().setRequest(request)
                 .setHttpListener(listener);
@@ -96,11 +98,14 @@ public class HttpSupport implements IHttpSupport {
     public <RESP> void postJson(String cmd, Object data, final Class<?> clz,
             IHttpListener<RESP> listener) {
         check();
+        check(null == cmd || null == clz);
 
         final JsonRequest request = new JsonRequest();
         request.setClz(clz);
         request.setThreadMode(threadMode);
-        request.setUrl(urlGenerator.toUrl(cmd));
+        if (null != urlGenerator) {
+            request.setUrl(urlGenerator.toUrl(cmd));
+        }
         request.setData(data);
         request.setRetry(retry);
         request.setMaxRetryTimes(maxRetryTimes);
@@ -114,12 +119,15 @@ public class HttpSupport implements IHttpSupport {
     public <RESP> void post(String cmd, Object data, final Class<?> clz,
             ICodec codec, IHttpListener<RESP> listener) {
         check();
+        check(null == cmd || null == clz || null == codec);
 
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
         request.setThreadMode(threadMode);
-        request.setUrl(urlGenerator.toUrl(cmd));
+        if (null != urlGenerator) {
+            request.setUrl(urlGenerator.toUrl(cmd));
+        }
         request.setData(data);
         request.setRetry(retry);
         request.setMaxRetryTimes(maxRetryTimes);
@@ -153,6 +161,8 @@ public class HttpSupport implements IHttpSupport {
 
     @Override
     public <RESP> void get(Request request, IHttpListener<RESP> listener) {
+        check(null == request || null == request.clz || null == request.codec
+                || null == request.url);
 
         final HttpTask<RESP> task = new GetTask<RESP>().setRequest(request)
                 .setHttpListener(listener);
@@ -163,16 +173,15 @@ public class HttpSupport implements IHttpSupport {
     public <RESP> void get(String cmd, Class<?> clz, ICodec codec,
             IHttpListener<RESP> listener) {
         check();
-
-        if (null == clz || null == codec) {
-            throw new IllegalArgumentException("参数错误");
-        }
+        check(null == clz || null == codec);
 
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
         request.setThreadMode(threadMode);
-        request.setUrl(urlGenerator.toUrl(cmd));
+        if (null != urlGenerator) {
+            request.setUrl(urlGenerator.toUrl(cmd));
+        }
         request.setRetry(retry);
         request.setMaxRetryTimes(maxRetryTimes);
 
@@ -182,6 +191,7 @@ public class HttpSupport implements IHttpSupport {
     @Override
     public <RESP> void getByUrl(String url, Class<?> clz, ICodec codec,
             IHttpListener<RESP> listener) {
+        check(null == url || null == codec);
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
@@ -195,8 +205,27 @@ public class HttpSupport implements IHttpSupport {
 
     private void check() {
         if (null == urlGenerator) {
-            throw new IllegalStateException(
+            final IllegalStateException e = new IllegalStateException(
                     "URL 产生器不能为空，请调用 setUrlGenerator 方法设置");
+
+            if (debug) {
+                throw e;
+            } else {
+                LogUtils.e(TAG, "check()", e);
+            }
+        }
+    }
+
+    private void check(final boolean illegal) {
+        if (illegal) {
+            final IllegalArgumentException e = new IllegalArgumentException(
+                    "参数错误");
+
+            if (debug) {
+                throw e;
+            } else {
+                LogUtils.e(TAG, "check(boolean)", e);
+            }
         }
     }
 }
