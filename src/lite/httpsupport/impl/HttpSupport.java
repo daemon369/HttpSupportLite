@@ -66,7 +66,7 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public boolean getDebug() {
+    public boolean isDebug() {
         return debug;
     }
 
