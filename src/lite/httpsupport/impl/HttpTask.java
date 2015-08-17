@@ -42,7 +42,7 @@ abstract class HttpTask<RESP> implements Runnable {
             switch (msg.what) {
             case WHAT_SUCCESS:
                 try {
-                    listener.onSuccess(msg.arg1, (RESP) msg.obj);
+                    listener.onSuccess((RESP) msg.obj);
                 } catch (Exception e) {
                     LogUtils.e(TAG, "handle success exception:", e);
                 }
@@ -231,7 +231,7 @@ abstract class HttpTask<RESP> implements Runnable {
                                 responseBuff, request.getClz());
 
                         if (null != obj) {
-                            handleSuccess(request.getThreadMode(), code, obj);
+                            handleSuccess(request.getThreadMode(), obj);
                         } else {
                             throw new HttpError().setHttpCode(code)
                                     .setErrorMessage("解码返回 null");
@@ -266,12 +266,11 @@ abstract class HttpTask<RESP> implements Runnable {
     protected abstract void request(final HttpURLConnection conn,
             final Request request) throws HttpError;
 
-    protected void handleSuccess(final ThreadMode mode, final int code,
-            final RESP o) {
+    protected void handleSuccess(final ThreadMode mode, final RESP o) {
         switch (mode) {
         case Default:
             try {
-                listener.onSuccess(code, o);
+                listener.onSuccess(o);
             } catch (Exception e) {
                 LogUtils.e(TAG, "handle success exception:", e);
             }
@@ -279,7 +278,6 @@ abstract class HttpTask<RESP> implements Runnable {
 
         default:
             final Message msg = handler.obtainMessage(WHAT_SUCCESS, o);
-            msg.arg1 = code;
             handler.sendMessage(msg);
             break;
         }
