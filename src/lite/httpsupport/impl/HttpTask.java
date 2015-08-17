@@ -182,7 +182,7 @@ abstract class HttpTask<RESP> implements Runnable {
             request(conn, request);
 
             // receive data
-            int code;
+            final int code;
             try {
                 code = conn.getResponseCode();
             } catch (IOException e) {
@@ -198,7 +198,7 @@ abstract class HttpTask<RESP> implements Runnable {
                         "返回码为：" + code);
             }
 
-            InputStream in;
+            final InputStream in;
             try {
                 in = conn.getInputStream();
             } catch (IOException e) {
@@ -230,7 +230,12 @@ abstract class HttpTask<RESP> implements Runnable {
                         final RESP obj = request.getCodec().decode(
                                 responseBuff, request.getClz());
 
-                        handleSuccess(request.getThreadMode(), code, obj);
+                        if (null != obj) {
+                            handleSuccess(request.getThreadMode(), code, obj);
+                        } else {
+                            throw new HttpError().setHttpCode(code)
+                                    .setErrorMessage("解码返回 null");
+                        }
                     } catch (CodecException e) {
                         throw new HttpError(e).setHttpCode(code)
                                 .setErrorMessage("解码失败");
