@@ -98,7 +98,7 @@ abstract class HttpTask<RESP> implements Runnable {
         LogUtils.d(TAG, "request: " + request + " listener: " + listener);
 
         try {
-            if (null == request || null == request.getData()) {
+            if (null == request) {
                 throw new HttpError().setErrorMessage("请求为空：" + request);
             }
 
