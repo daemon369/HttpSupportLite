@@ -29,20 +29,34 @@ public class PostTask<RESP> extends HttpTask<RESP> {
                     + e.getMessage());
         }
 
-        final byte[] reqData;
         try {
-            reqData = request.getCodec().encode(request.getData());
-            LogUtils.d(TAG, "请求实体编码成功");
-        } catch (CodecException e) {
-            throw new HttpError(e).setErrorMessage("编码失败：" + e.getMessage());
-        }
 
-        try {
-            out.write(reqData);
-            out.flush();
-        } catch (IOException e) {
-            throw new HttpError(e)
-                    .setErrorMessage("发送请求IO异常：" + e.getMessage());
+            if (null == request.getData()) {
+                LogUtils.w(TAG, "请求实体为空");
+            } else {
+
+                if (null == request.getCodec()) {
+                    throw new HttpError().setErrorMessage("编码器为空");
+                }
+
+                final byte[] reqData;
+                try {
+                    reqData = request.getCodec().encode(request.getData());
+                    LogUtils.d(TAG, "请求实体编码成功");
+                } catch (CodecException e) {
+                    throw new HttpError(e).setErrorMessage("编码失败："
+                            + e.getMessage());
+                }
+
+                try {
+                    out.write(reqData);
+                    out.flush();
+                } catch (IOException e) {
+                    throw new HttpError(e).setErrorMessage("发送请求IO异常："
+                            + e.getMessage());
+                }
+            }
+
         } finally {
             // 关闭 OutputStream
             try {
