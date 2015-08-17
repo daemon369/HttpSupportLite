@@ -11,6 +11,8 @@ public interface IHttpSupport {
 
     void setDebug(final boolean debug);
 
+    boolean getDebug();
+
     Level getLogLevel();
 
     void setLogLevel(final Level level);

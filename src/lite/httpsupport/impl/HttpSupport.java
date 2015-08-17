@@ -66,6 +66,11 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
+    public boolean getDebug() {
+        return debug;
+    }
+
+    @Override
     public Level getLogLevel() {
         return LogUtils.getLogLevel();
     }
