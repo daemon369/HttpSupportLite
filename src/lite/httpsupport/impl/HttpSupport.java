@@ -110,26 +110,6 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public <RESP> void postJson(String cmd, Object data, final Class<?> clz,
-            IHttpListener<RESP> listener) {
-        check();
-        check(null == cmd || null == clz);
-
-        final JsonRequest request = new JsonRequest();
-        request.setClz(clz);
-        if (null != urlGenerator) {
-            request.setUrl(urlGenerator.toUrl(cmd));
-        }
-        request.setData(data);
-        request.setRetry(retry);
-        request.setMaxRetryTimes(maxRetryTimes);
-
-        final HttpTask<RESP> task = new PostTask<RESP>().setRequest(request)
-                .setHttpListener(listener);
-        getExecutor().execute(task);
-    }
-
-    @Override
     public <RESP> void post(String cmd, Object data, final Class<?> clz,
             ICodec codec, IHttpListener<RESP> listener) {
         check();

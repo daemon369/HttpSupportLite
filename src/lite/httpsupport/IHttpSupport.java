@@ -66,17 +66,6 @@ public interface IHttpSupport {
             final ICodec codec, final IHttpListener<RESP> listener);
 
     /**
-     * 发送 JSON post 请求
-     * 
-     * @param cmd
-     * @param data
-     * @param clz
-     * @param listener
-     */
-    <RESP> void postJson(final String cmd, final Object data,
-            final Class<?> clz, final IHttpListener<RESP> listener);
-
-    /**
      * 发送 get 请求
      * 
      * @param request

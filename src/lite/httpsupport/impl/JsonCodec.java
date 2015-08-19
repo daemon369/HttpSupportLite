@@ -5,7 +5,7 @@ import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-class JsonCodec implements ICodec {
+public class JsonCodec implements ICodec {
     private static final String TAG = "JsonCodec";
 
     private volatile static JsonCodec instance = null;
