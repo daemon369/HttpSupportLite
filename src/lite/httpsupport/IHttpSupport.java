@@ -94,15 +94,4 @@ public interface IHttpSupport {
      */
     <RESP> void get(final String cmd, final Class<?> clz, final ICodec codec,
             final IHttpListener<RESP> listener);
-
-    /**
-     * 使用全路径 url 发送 get 请求
-     * 
-     * @param url
-     * @param clz
-     * @param codec
-     * @param listener
-     */
-    <RESP> void getByUrl(final String url, final Class<?> clz,
-            final ICodec codec, final IHttpListener<RESP> listener);
 }

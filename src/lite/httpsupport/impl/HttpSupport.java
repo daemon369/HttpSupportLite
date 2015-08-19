@@ -178,20 +178,6 @@ public class HttpSupport implements IHttpSupport {
         get(request, listener);
     }
 
-    @Override
-    public <RESP> void getByUrl(String url, Class<?> clz, ICodec codec,
-            IHttpListener<RESP> listener) {
-        check(null == url || null == codec);
-        final Request request = new Request();
-        request.setCodec(codec);
-        request.setClz(clz);
-        request.setUrl(url);
-        request.setRetry(retry);
-        request.setMaxRetryTimes(maxRetryTimes);
-
-        get(request, listener);
-    }
-
     private void check() {
         if (null == urlGenerator) {
             final IllegalStateException e = new IllegalStateException(
