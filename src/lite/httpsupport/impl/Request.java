@@ -9,7 +9,6 @@ public class Request {
     Class<?> clz;
     boolean retry;
     int maxRetryTimes;
-    ThreadMode threadMode;
 
     @Override
     public String toString() {
@@ -68,15 +67,6 @@ public class Request {
 
     public Request setMaxRetryTimes(int maxRetryTimes) {
         this.maxRetryTimes = maxRetryTimes;
-        return this;
-    }
-
-    public ThreadMode getThreadMode() {
-        return threadMode;
-    }
-
-    public Request setThreadMode(ThreadMode threadMode) {
-        this.threadMode = threadMode;
         return this;
     }
 }

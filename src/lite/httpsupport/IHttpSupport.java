@@ -2,7 +2,6 @@ package lite.httpsupport;
 
 import lite.httpsupport.codec.ICodec;
 import lite.httpsupport.impl.Request;
-import lite.httpsupport.impl.ThreadMode;
 import lite.httpsupport.log.ILogger;
 import lite.httpsupport.log.ILogger.Level;
 import lite.httpsupport.url.IUrlGenerator;
@@ -23,15 +22,6 @@ public interface IHttpSupport {
      * @param logger
      */
     void setLogger(final ILogger logger);
-
-    /**
-     * 设置回调函数执行线程
-     * 
-     * @param mode
-     *            函数执行线程
-     * @See {@link ThreadMode}
-     */
-    void setThreadMode(final ThreadMode mode);
 
     /**
      * 设置 URL 构造器

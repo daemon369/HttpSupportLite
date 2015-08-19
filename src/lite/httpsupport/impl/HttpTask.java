@@ -10,9 +10,6 @@ import java.net.URL;
 
 import lite.httpsupport.IHttpListener;
 import lite.httpsupport.codec.ICodec.CodecException;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 
 abstract class HttpTask<RESP> implements Runnable {
     private static final String TAG = "HttpTask";
@@ -30,43 +27,8 @@ abstract class HttpTask<RESP> implements Runnable {
     private final static int CONNECTION_TIMEOUT = 25 * 1000;
     private static final int READWIRTE_TIMEOUT = 30 * 1000;
 
-    private static final int WHAT_SUCCESS = 1;
-    private static final int WHAT_FAILED = 2;
-
-    private Handler handler = null;
-    private Handler.Callback callback = new Handler.Callback() {
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-            case WHAT_SUCCESS:
-                try {
-                    listener.onSuccess((RESP) msg.obj);
-                } catch (Exception e) {
-                    LogUtils.e(TAG, "handle success exception:", e);
-                }
-                break;
-
-            case WHAT_FAILED:
-                try {
-                    listener.onFail((HttpError) msg.obj);
-                } catch (Exception e) {
-                    LogUtils.e(TAG, "handle failed exception", e);
-                }
-                break;
-
-            default:
-                break;
-            }
-
-            return true;
-        }
-    };
-
     public HttpTask() {
         this.recvBuffer = new byte[1024 * 8];
-        handler = new Handler(Looper.getMainLooper(), callback);
     }
 
     public HttpTask<RESP> setRequest(final Request request) {
@@ -138,7 +100,7 @@ abstract class HttpTask<RESP> implements Runnable {
         } catch (HttpError err) {
             // 请求失败或返回不成功
             LogUtils.w(TAG, "请求失败：", err);
-            handleFailed(request.getThreadMode(), err);
+            handleFailed(err);
 
         } catch (Exception e) {
             // 请求失败或返回不成功
@@ -146,7 +108,7 @@ abstract class HttpTask<RESP> implements Runnable {
 
             final HttpError err = new HttpError(e).setErrorMessage("未正确处理的异常："
                     + e.getMessage());
-            handleFailed(request.getThreadMode(), err);
+            handleFailed(err);
         }
     }
 
@@ -231,7 +193,7 @@ abstract class HttpTask<RESP> implements Runnable {
                                 responseBuff, request.getClz());
 
                         if (null != obj) {
-                            handleSuccess(request.getThreadMode(), obj);
+                            handleSuccess(obj);
                         } else {
                             throw new HttpError().setHttpCode(code)
                                     .setErrorMessage("解码返回 null");
@@ -266,36 +228,19 @@ abstract class HttpTask<RESP> implements Runnable {
     protected abstract void request(final HttpURLConnection conn,
             final Request request) throws HttpError;
 
-    protected void handleSuccess(final ThreadMode mode, final RESP o) {
-        switch (mode) {
-        case Default:
-            try {
-                listener.onSuccess(o);
-            } catch (Exception e) {
-                LogUtils.e(TAG, "handle success exception:", e);
-            }
-            break;
-
-        default:
-            final Message msg = handler.obtainMessage(WHAT_SUCCESS, o);
-            handler.sendMessage(msg);
-            break;
+    protected void handleSuccess(final RESP o) {
+        try {
+            listener.onSuccess(o);
+        } catch (Exception e) {
+            LogUtils.e(TAG, "handle success exception:", e);
         }
     }
 
-    protected void handleFailed(final ThreadMode mode, final HttpError err) {
-        switch (mode) {
-        case Default:
-            try {
-                listener.onFail(err);
-            } catch (Exception e) {
-                LogUtils.e(TAG, "handle failed exception", e);
-            }
-            break;
-
-        default:
-            handler.sendMessage(handler.obtainMessage(WHAT_FAILED, err));
-            break;
+    protected void handleFailed(final HttpError err) {
+        try {
+            listener.onFail(err);
+        } catch (Exception e) {
+            LogUtils.e(TAG, "handle failed exception", e);
         }
     }
 }

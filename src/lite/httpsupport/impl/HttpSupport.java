@@ -23,7 +23,6 @@ public class HttpSupport implements IHttpSupport {
     private volatile ThreadPoolExecutor executor = null;
 
     private boolean debug = false;
-    private ThreadMode threadMode = ThreadMode.Default;
     private IUrlGenerator urlGenerator = null;
 
     private boolean retry = true;
@@ -86,11 +85,6 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public void setThreadMode(ThreadMode mode) {
-        this.threadMode = mode;
-    }
-
-    @Override
     public void setUrlGenerator(final IUrlGenerator urlGenerator) {
         this.urlGenerator = urlGenerator;
     }
@@ -123,7 +117,6 @@ public class HttpSupport implements IHttpSupport {
 
         final JsonRequest request = new JsonRequest();
         request.setClz(clz);
-        request.setThreadMode(threadMode);
         if (null != urlGenerator) {
             request.setUrl(urlGenerator.toUrl(cmd));
         }
@@ -145,7 +138,6 @@ public class HttpSupport implements IHttpSupport {
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
-        request.setThreadMode(threadMode);
         if (null != urlGenerator) {
             request.setUrl(urlGenerator.toUrl(cmd));
         }
@@ -177,7 +169,6 @@ public class HttpSupport implements IHttpSupport {
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
-        request.setThreadMode(threadMode);
         if (null != urlGenerator) {
             request.setUrl(urlGenerator.toUrl(cmd));
         }
@@ -194,7 +185,6 @@ public class HttpSupport implements IHttpSupport {
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
-        request.setThreadMode(threadMode);
         request.setUrl(url);
         request.setRetry(retry);
         request.setMaxRetryTimes(maxRetryTimes);
