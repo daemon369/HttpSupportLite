@@ -4,7 +4,6 @@ import lite.httpsupport.codec.ICodec;
 import lite.httpsupport.impl.Request;
 import lite.httpsupport.log.ILogger;
 import lite.httpsupport.log.ILogger.Level;
-import lite.httpsupport.url.IUrlGenerator;
 
 public interface IHttpSupport {
 
@@ -22,13 +21,6 @@ public interface IHttpSupport {
      * @param logger
      */
     void setLogger(final ILogger logger);
-
-    /**
-     * 设置 URL 构造器
-     * 
-     * @param urlGenerator
-     */
-    void setUrlGenerator(final IUrlGenerator urlGenerator);
 
     /**
      * 设置是否开启重试模式
@@ -56,13 +48,13 @@ public interface IHttpSupport {
     /**
      * 发送 post 请求
      * 
-     * @param cmd
+     * @param url
      * @param data
      * @param clz
      * @param codec
      * @param listener
      */
-    <RESP> void post(final String cmd, final Object data, final Class<?> clz,
+    <RESP> void post(final String url, final Object data, final Class<?> clz,
             final ICodec codec, final IHttpListener<RESP> listener);
 
     /**
@@ -76,11 +68,11 @@ public interface IHttpSupport {
     /**
      * 发送 get 请求
      * 
-     * @param cmd
+     * @param url
      * @param clz
      * @param codec
      * @param listener
      */
-    <RESP> void get(final String cmd, final Class<?> clz, final ICodec codec,
+    <RESP> void get(final String url, final Class<?> clz, final ICodec codec,
             final IHttpListener<RESP> listener);
 }

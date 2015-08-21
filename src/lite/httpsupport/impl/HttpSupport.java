@@ -9,7 +9,6 @@ import lite.httpsupport.IHttpSupport;
 import lite.httpsupport.codec.ICodec;
 import lite.httpsupport.log.ILogger;
 import lite.httpsupport.log.ILogger.Level;
-import lite.httpsupport.url.IUrlGenerator;
 
 public class HttpSupport implements IHttpSupport {
     static final String TAG = "HttpSupport";
@@ -23,7 +22,6 @@ public class HttpSupport implements IHttpSupport {
     private volatile ThreadPoolExecutor executor = null;
 
     private boolean debug = false;
-    private IUrlGenerator urlGenerator = null;
 
     private boolean retry = true;
     private int maxRetryTimes = 3;
@@ -85,11 +83,6 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public void setUrlGenerator(final IUrlGenerator urlGenerator) {
-        this.urlGenerator = urlGenerator;
-    }
-
-    @Override
     public void setRetry(boolean retry) {
         this.retry = retry;
     }
@@ -110,17 +103,14 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public <RESP> void post(String cmd, Object data, final Class<?> clz,
+    public <RESP> void post(String url, Object data, final Class<?> clz,
             ICodec codec, IHttpListener<RESP> listener) {
-        check();
-        check(null == cmd || null == clz || null == codec);
+        check(null == url || null == clz || null == codec);
 
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
-        if (null != urlGenerator) {
-            request.setUrl(urlGenerator.toUrl(cmd));
-        }
+        request.setUrl(url);
         request.setData(data);
         request.setRetry(retry);
         request.setMaxRetryTimes(maxRetryTimes);
@@ -141,34 +131,18 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public <RESP> void get(String cmd, Class<?> clz, ICodec codec,
+    public <RESP> void get(String url, Class<?> clz, ICodec codec,
             IHttpListener<RESP> listener) {
-        check();
         check(null == clz || null == codec);
 
         final Request request = new Request();
         request.setCodec(codec);
         request.setClz(clz);
-        if (null != urlGenerator) {
-            request.setUrl(urlGenerator.toUrl(cmd));
-        }
+        request.setUrl(url);
         request.setRetry(retry);
         request.setMaxRetryTimes(maxRetryTimes);
 
         get(request, listener);
-    }
-
-    private void check() {
-        if (null == urlGenerator) {
-            final IllegalStateException e = new IllegalStateException(
-                    "URL 产生器不能为空，请调用 setUrlGenerator 方法设置");
-
-            if (debug) {
-                throw e;
-            } else {
-                LogUtils.e(TAG, "check()", e);
-            }
-        }
     }
 
     private void check(final boolean illegal) {
