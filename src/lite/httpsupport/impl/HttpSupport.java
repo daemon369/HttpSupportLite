@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import lite.httpsupport.IHttpListener;
 import lite.httpsupport.IHttpSupport;
-import lite.httpsupport.codec.ICodec;
 import lite.httpsupport.log.ILogger;
 import lite.httpsupport.log.ILogger.Level;
 
@@ -22,9 +21,6 @@ public class HttpSupport implements IHttpSupport {
     private volatile ThreadPoolExecutor executor = null;
 
     private boolean debug = false;
-
-    private boolean retry = true;
-    private int maxRetryTimes = 3;
 
     public HttpSupport() {
     }
@@ -83,66 +79,21 @@ public class HttpSupport implements IHttpSupport {
     }
 
     @Override
-    public void setRetry(boolean retry) {
-        this.retry = retry;
-    }
+    public <T> void post(Request<T> request, IHttpListener<T> listener) {
+        check(null == request || null == request.url);
 
-    @Override
-    public void setMaxRetryTimes(int maxRetryTimes) {
-        this.maxRetryTimes = maxRetryTimes;
-    }
-
-    @Override
-    public <RESP> void post(Request request, IHttpListener<RESP> listener) {
-        check(null == request || null == request.clz || null == request.codec
-                || null == request.url);
-
-        final HttpTask<RESP> task = new PostTask<RESP>().setRequest(request)
+        final HttpTask<T> task = new PostTask<T>(request)
                 .setHttpListener(listener);
         getExecutor().execute(task);
     }
 
     @Override
-    public <RESP> void post(String url, Object data, final Class<?> clz,
-            ICodec codec, IHttpListener<RESP> listener) {
-        check(null == url || null == clz || null == codec);
+    public <T> void get(Request<T> request, IHttpListener<T> listener) {
+        check(null == request || null == request.url);
 
-        final Request request = new Request();
-        request.setCodec(codec);
-        request.setClz(clz);
-        request.setUrl(url);
-        request.setData(data);
-        request.setRetry(retry);
-        request.setMaxRetryTimes(maxRetryTimes);
-
-        final HttpTask<RESP> task = new PostTask<RESP>().setRequest(request)
+        final HttpTask<T> task = new GetTask<T>(request)
                 .setHttpListener(listener);
         getExecutor().execute(task);
-    }
-
-    @Override
-    public <RESP> void get(Request request, IHttpListener<RESP> listener) {
-        check(null == request || null == request.clz || null == request.codec
-                || null == request.url);
-
-        final HttpTask<RESP> task = new GetTask<RESP>().setRequest(request)
-                .setHttpListener(listener);
-        getExecutor().execute(task);
-    }
-
-    @Override
-    public <RESP> void get(String url, Class<?> clz, ICodec codec,
-            IHttpListener<RESP> listener) {
-        check(null == clz || null == codec);
-
-        final Request request = new Request();
-        request.setCodec(codec);
-        request.setClz(clz);
-        request.setUrl(url);
-        request.setRetry(retry);
-        request.setMaxRetryTimes(maxRetryTimes);
-
-        get(request, listener);
     }
 
     private void check(final boolean illegal) {

@@ -2,7 +2,11 @@ package lite.httpsupport.impl;
 
 import java.net.HttpURLConnection;
 
-public class GetTask<RESP> extends HttpTask<RESP> {
+public class GetTask<T> extends HttpTask<T> {
+
+    public GetTask(Request<T> request) {
+        super(request);
+    }
 
     @Override
     protected Method getMethod() {
@@ -10,7 +14,7 @@ public class GetTask<RESP> extends HttpTask<RESP> {
     }
 
     @Override
-    protected void request(HttpURLConnection conn, Request request)
+    protected void request(HttpURLConnection conn, Request<T> request)
             throws HttpError {
         // empty
     }

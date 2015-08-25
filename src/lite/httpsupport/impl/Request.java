@@ -1,72 +1,100 @@
 package lite.httpsupport.impl;
 
-import lite.httpsupport.codec.ICodec;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.Map;
 
-public class Request {
-    String url;
-    Object data;
-    ICodec codec;
-    Class<?> clz;
+public abstract class Request<T> {
+    private static final String DEFAULT_ENCODING = "UTF-8";
+
+    final String url;
     boolean retry;
     int maxRetryTimes;
+    Object tag;
 
-    @Override
-    public String toString() {
-        return "[url:" + url + ", data:" + data + ", codec:" + codec + ", clz:"
-                + clz + ", retry:" + retry + ", maxRetryTimes:" + maxRetryTimes
-                + "]";
+    public Request(final String url) {
+        this.url = url;
+    }
+
+    public Map<String, String> getHeaders() throws Exception {
+        return Collections.emptyMap();
+    }
+
+    protected Map<String, String> getParams() throws Exception {
+        return null;
+    }
+
+    protected String getParamsEncoding() {
+        return DEFAULT_ENCODING;
+    }
+
+    public String getBodyContentType() {
+        return "application/x-www-form-urlencoded; charset="
+                + getParamsEncoding();
+    }
+
+    public byte[] getBody() throws Exception {
+        final Map<String, String> params = getParams();
+        if (params != null && params.size() > 0) {
+            return encodeParameters(params, getParamsEncoding());
+        }
+        return null;
+    }
+
+    private byte[] encodeParameters(Map<String, String> params,
+            String paramsEncoding) {
+        final StringBuilder encodedParams = new StringBuilder();
+        try {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                encodedParams.append(URLEncoder.encode(entry.getKey(),
+                        paramsEncoding));
+                encodedParams.append('=');
+                encodedParams.append(URLEncoder.encode(entry.getValue(),
+                        paramsEncoding));
+                encodedParams.append('&');
+            }
+            return encodedParams.toString().getBytes(paramsEncoding);
+        } catch (UnsupportedEncodingException uee) {
+            throw new RuntimeException("Encoding not supported: "
+                    + paramsEncoding, uee);
+        }
+    }
+
+    abstract protected T parseResponse(final byte[] data) throws Exception;
+
+    protected HttpError parseNetworkError(HttpError httpError) {
+        return httpError;
     }
 
     public String getUrl() {
         return url;
     }
 
-    public Request setUrl(String url) {
-        this.url = url;
-        return this;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public Request setData(Object data) {
-        this.data = data;
-        return this;
-    }
-
-    public ICodec getCodec() {
-        return codec;
-    }
-
-    public Request setCodec(ICodec codec) {
-        this.codec = codec;
-        return this;
-    }
-
-    public Class<?> getClz() {
-        return clz;
-    }
-
-    public Request setClz(Class<?> clz) {
-        this.clz = clz;
-        return this;
-    }
-
     public boolean isRetry() {
         return retry;
     }
 
-    public void setRetry(boolean retry) {
+    public Request<T> setRetry(boolean retry) {
         this.retry = retry;
+        return this;
     }
 
     public int getMaxRetryTimes() {
         return maxRetryTimes;
     }
 
-    public Request setMaxRetryTimes(int maxRetryTimes) {
+    public Request<T> setMaxRetryTimes(int maxRetryTimes) {
         this.maxRetryTimes = maxRetryTimes;
+        return this;
+    }
+
+    public Object getTag() {
+        return tag;
+    }
+
+    public Request<T> setTag(Object tag) {
+        this.tag = tag;
         return this;
     }
 }

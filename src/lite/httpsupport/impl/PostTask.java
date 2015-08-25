@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
-import lite.httpsupport.codec.ICodec.CodecException;
-
-public class PostTask<RESP> extends HttpTask<RESP> {
+public class PostTask<T> extends HttpTask<T> {
 
     private static final String TAG = "PostTask";
+
+    public PostTask(Request<T> request) {
+        super(request);
+    }
 
     @Override
     protected Method getMethod() {
@@ -16,53 +18,43 @@ public class PostTask<RESP> extends HttpTask<RESP> {
     }
 
     @Override
-    protected void request(final HttpURLConnection conn, final Request request)
-            throws HttpError {
+    protected void request(final HttpURLConnection conn,
+            final Request<T> request) throws HttpError {
 
         // send data
-        OutputStream out;
+        final byte[] body;
         try {
-            out = conn.getOutputStream();
-            LogUtils.d(TAG, "打开 OutputStream 准备发送数据");
-        } catch (IOException e) {
-            throw new HttpError(e).setErrorMessage("OutputStream打开失败："
-                    + e.getMessage());
+            body = request.getBody();
+        } catch (Exception e) {
+            throw new HttpError(e).setErrorMessage("request.getBody exception");
         }
 
-        try {
+        if (null != body) {
+            conn.setDoOutput(true);
+            conn.addRequestProperty(HEADER_CONTENT_TYPE,
+                    request.getBodyContentType());
 
-            if (null == request.getData()) {
-                LogUtils.w(TAG, "请求实体为空");
-            } else {
-
-                if (null == request.getCodec()) {
-                    throw new HttpError().setErrorMessage("编码器为空");
-                }
-
-                final byte[] reqData;
-                try {
-                    reqData = request.getCodec().encode(request.getData());
-                    LogUtils.d(TAG, "请求实体编码成功");
-                } catch (CodecException e) {
-                    throw new HttpError(e).setErrorMessage("编码失败："
-                            + e.getMessage());
-                }
-
-                try {
-                    out.write(reqData);
-                    out.flush();
-                } catch (IOException e) {
-                    throw new HttpError(e).setErrorMessage("发送请求IO异常："
-                            + e.getMessage());
-                }
-            }
-
-        } finally {
-            // 关闭 OutputStream
+            final OutputStream out;
             try {
-                out.close();
-            } catch (IOException e1) {
+                out = conn.getOutputStream();
+                LogUtils.d(TAG, "打开 OutputStream 准备发送数据");
+            } catch (IOException e) {
+                throw new HttpError(e).setErrorMessage("OutputStream打开失败："
+                        + e.getMessage());
             }
+
+            try {
+                out.write(body);
+            } catch (IOException e) {
+                throw new HttpError(e).setErrorMessage("发送请求IO异常："
+                        + e.getMessage());
+            } finally {
+                try {
+                    out.close();
+                } catch (Exception e) {
+                }
+            }
+
         }
 
     }

@@ -7,19 +7,19 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import lite.httpsupport.IHttpListener;
-import lite.httpsupport.codec.ICodec.CodecException;
 
-abstract class HttpTask<RESP> implements Runnable {
+abstract class HttpTask<T> implements Runnable {
     private static final String TAG = "HttpTask";
 
-    private Request request;
-    private IHttpListener<RESP> listener;
+    private final Request<T> request;
+    private IHttpListener<T> listener;
     private byte[] recvBuffer;
     private int retryTimes = 0;
 
-    private final static String CONTENT_TYPE = "application/json";
     private final static String USER_AGENT = "Android";
     private final static String PRAGMA = "no-cache";
     private final static String ACCEPT_LANGUAGE = "zh-CN";
@@ -27,16 +27,14 @@ abstract class HttpTask<RESP> implements Runnable {
     private final static int CONNECTION_TIMEOUT = 25 * 1000;
     private static final int READWIRTE_TIMEOUT = 30 * 1000;
 
-    public HttpTask() {
+    protected static final String HEADER_CONTENT_TYPE = "Content-Type";
+
+    public HttpTask(final Request<T> request) {
         this.recvBuffer = new byte[1024 * 8];
-    }
-
-    public HttpTask<RESP> setRequest(final Request request) {
         this.request = request;
-        return this;
     }
 
-    public HttpTask<RESP> setHttpListener(final IHttpListener<RESP> listener) {
+    public HttpTask<T> setHttpListener(final IHttpListener<T> listener) {
         this.listener = listener;
         return this;
     }
@@ -45,10 +43,7 @@ abstract class HttpTask<RESP> implements Runnable {
         conn.setConnectTimeout(CONNECTION_TIMEOUT);
         conn.setReadTimeout(READWIRTE_TIMEOUT);
         conn.setUseCaches(false);
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
         conn.setInstanceFollowRedirects(true);
-        conn.setRequestProperty("Content-Type", CONTENT_TYPE);
         conn.setRequestProperty("User-Agent", USER_AGENT);
         conn.setRequestProperty("Pragma", PRAGMA);
         conn.setRequestProperty("Accept-Language", ACCEPT_LANGUAGE);
@@ -81,12 +76,12 @@ abstract class HttpTask<RESP> implements Runnable {
 
                 } catch (HttpError err) {
                     if (!request.isRetry()) {
-                        LogUtils.e(TAG, "请求失败，不进行重试");
+                        LogUtils.e(TAG, "请求失败，不进行重试：" + err.getErrorMessage());
                         throw err;
                     } else if (retryTimes++ >= request.getMaxRetryTimes()) {
                         // 超过最大重试次数
-                        LogUtils.e(TAG,
-                                "超过最大重试次数：" + request.getMaxRetryTimes());
+                        LogUtils.e(TAG, "请求失败：" + err.getErrorMessage()
+                                + " 超过最大重试次数：" + request.getMaxRetryTimes());
                         throw err;
                     } else {
                         LogUtils.w(
@@ -123,23 +118,33 @@ abstract class HttpTask<RESP> implements Runnable {
                     + e.getMessage());
         }
 
+        final Method method = getMethod();
+        if (null == method) {
+            throw new HttpError().setErrorMessage("HTTP method 不能为空！");
+        }
+
         try {
             try {
                 conn.setRequestMethod(getMethod().getMethod());
-            } catch (NullPointerException e) {
-                throw new HttpError().setErrorMessage("HTTP method 不能为空！");
             } catch (ProtocolException e) {
                 throw new HttpError(e).setErrorMessage("设置Http Method异常");
             }
 
-            setRequestProperty(conn);
-
+            final HashMap<String, String> map = new HashMap<String, String>();
             try {
-                conn.connect();
-            } catch (IOException e) {
-                throw new HttpError(e).setErrorMessage("Http连接错误："
-                        + e.getMessage());
+                final Map<String, String> headers = request.getHeaders();
+                if (null != headers) {
+                    map.putAll(request.getHeaders());
+                }
+            } catch (Exception e) {
+                LogUtils.w(TAG, e);
             }
+
+            for (String headerName : map.keySet()) {
+                conn.addRequestProperty(headerName, map.get(headerName));
+            }
+
+            setRequestProperty(conn);
 
             request(conn, request);
 
@@ -187,18 +192,17 @@ abstract class HttpTask<RESP> implements Runnable {
                     final byte[] responseBuff = saveStream.toByteArray();
                     LogUtils.d(TAG, "response length:" + responseBuff.length);
 
+                    final T response;
                     try {
-                        LogUtils.d(TAG, "RESP class:" + request.getClz());
-                        final RESP obj = request.getCodec().decode(
-                                responseBuff, request.getClz());
+                        response = request.parseResponse(responseBuff);
 
-                        if (null != obj) {
-                            handleSuccess(obj);
+                        if (null != response) {
+                            handleSuccess(response);
                         } else {
                             throw new HttpError().setHttpCode(code)
-                                    .setErrorMessage("解码返回 null");
+                                    .setErrorMessage("解码失败");
                         }
-                    } catch (CodecException e) {
+                    } catch (Exception e) {
                         throw new HttpError(e).setHttpCode(code)
                                 .setErrorMessage("解码失败");
                     }
@@ -226,9 +230,9 @@ abstract class HttpTask<RESP> implements Runnable {
     protected abstract Method getMethod();
 
     protected abstract void request(final HttpURLConnection conn,
-            final Request request) throws HttpError;
+            final Request<T> request) throws HttpError;
 
-    protected void handleSuccess(final RESP o) {
+    protected void handleSuccess(final T o) {
         try {
             listener.onSuccess(o);
         } catch (Exception e) {
