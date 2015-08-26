@@ -1,8 +1,8 @@
 package lite.httpsupport;
 
 import lite.httpsupport.impl.Request;
-import lite.httpsupport.log.ILogger;
-import lite.httpsupport.log.ILogger.Level;
+import lite.tool.log.ILogger;
+import lite.tool.log.ILogger.Level;
 
 public interface IHttpSupport {
 

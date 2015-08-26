@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lite.httpsupport.IHttpListener;
+import lite.tool.log.LogUtils;
 
 abstract class HttpTask<T> implements Runnable {
     private static final String TAG = "HttpTask";

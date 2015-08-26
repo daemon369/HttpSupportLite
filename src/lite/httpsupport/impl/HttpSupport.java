@@ -6,8 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import lite.httpsupport.IHttpListener;
 import lite.httpsupport.IHttpSupport;
-import lite.httpsupport.log.ILogger;
-import lite.httpsupport.log.ILogger.Level;
+import lite.tool.log.ILogger;
+import lite.tool.log.ILogger.Level;
+import lite.tool.log.LogUtils;
 
 public class HttpSupport implements IHttpSupport {
     static final String TAG = "HttpSupport";

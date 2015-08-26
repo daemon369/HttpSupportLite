@@ -1,5 +1,7 @@
 package lite.httpsupport.impl;
 
+import lite.tool.log.LogUtils;
+
 public class HttpError extends Throwable {
 
     private static final long serialVersionUID = -9096737856064739964L;
