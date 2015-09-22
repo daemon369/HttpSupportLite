@@ -1,19 +1,21 @@
 package lite.httpsupport.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class Request<T> {
     private static final String DEFAULT_ENCODING = "UTF-8";
+    public static final int MAX_RETRY_TIMES = 3;
 
+    final String uuid;
     final String url;
     boolean retry;
-    int maxRetryTimes;
+    int maxRetryTimes = MAX_RETRY_TIMES;
     Object tag;
 
     public Request(final String url) {
+        this.uuid = UUID.randomUUID().toString();
         this.url = url;
     }
 
@@ -21,50 +23,26 @@ public abstract class Request<T> {
         return Collections.emptyMap();
     }
 
-    protected Map<String, String> getParams() throws Exception {
-        return null;
-    }
-
     protected String getParamsEncoding() {
         return DEFAULT_ENCODING;
     }
 
     public String getBodyContentType() {
-        return "application/x-www-form-urlencoded; charset="
-                + getParamsEncoding();
+        return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
     }
 
     public byte[] getBody() throws Exception {
-        final Map<String, String> params = getParams();
-        if (params != null && params.size() > 0) {
-            return encodeParameters(params, getParamsEncoding());
-        }
         return null;
-    }
-
-    private byte[] encodeParameters(Map<String, String> params,
-            String paramsEncoding) {
-        final StringBuilder encodedParams = new StringBuilder();
-        try {
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                encodedParams.append(URLEncoder.encode(entry.getKey(),
-                        paramsEncoding));
-                encodedParams.append('=');
-                encodedParams.append(URLEncoder.encode(entry.getValue(),
-                        paramsEncoding));
-                encodedParams.append('&');
-            }
-            return encodedParams.toString().getBytes(paramsEncoding);
-        } catch (UnsupportedEncodingException uee) {
-            throw new RuntimeException("Encoding not supported: "
-                    + paramsEncoding, uee);
-        }
     }
 
     abstract protected T parseResponse(final byte[] data) throws Exception;
 
     protected HttpError parseNetworkError(HttpError httpError) {
         return httpError;
+    }
+
+    public String getUUID() {
+        return uuid;
     }
 
     public String getUrl() {
@@ -96,5 +74,14 @@ public abstract class Request<T> {
     public Request<T> setTag(Object tag) {
         this.tag = tag;
         return this;
+    }
+
+    protected String briefInfo() {
+        return "[uuid=" + uuid + ",url=" + url + "]";
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ": " + briefInfo();
     }
 }

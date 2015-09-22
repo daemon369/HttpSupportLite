@@ -1,10 +1,12 @@
 package lite.httpsupport.impl;
 
+import lite.tool.log.LogUtils;
 import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
 
 public class JsonRequest extends Request<JSON> {
+    private static final String TAG = "JsonRequest";
     private final Object request;
 
     public JsonRequest(String url, final Object request) {
@@ -20,17 +22,25 @@ public class JsonRequest extends Request<JSON> {
     @Override
     public byte[] getBody() throws Exception {
         if (null == request) {
+            LogUtils.w(TAG, briefInfo() + " request is null");
             return null;
         }
 
-        return JSON.toJSONString(request).getBytes();
+        final String json = JSON.toJSONString(request);
+
+        LogUtils.d(TAG, briefInfo() + " json:" + json);
+
+        return json.getBytes();
     }
 
     @Override
     protected JSON parseResponse(byte[] data) throws Exception {
-        final String jsonStr = new String(data);
-        if (!TextUtils.isEmpty(jsonStr)) {
-            return (JSON) JSON.parse(jsonStr);
+        final String json = new String(data);
+
+        LogUtils.d(TAG, briefInfo() + " response json:" + json);
+
+        if (!TextUtils.isEmpty(json)) {
+            return (JSON) JSON.parse(json);
         }
 
         return null;
