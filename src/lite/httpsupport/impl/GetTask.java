@@ -9,8 +9,8 @@ public class GetTask<T> extends HttpTask<T> {
     }
 
     @Override
-    protected Method getMethod() {
-        return Method.GET;
+    protected String getMethod() {
+        return "GET";
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.text.TextUtils;
 import lite.httpsupport.IHttpListener;
 import lite.tool.log.LogUtils;
 
@@ -112,14 +113,14 @@ abstract class HttpTask<T> implements Runnable {
             throw new HttpError(e).setErrorMessage("打开Http连接失败：" + e.getMessage());
         }
 
-        final Method method = getMethod();
-        if (null == method) {
+        final String method = getMethod();
+        if (TextUtils.isEmpty(method)) {
             throw new HttpError().setErrorMessage("HTTP method 不能为空！");
         }
 
         try {
             try {
-                conn.setRequestMethod(getMethod().getMethod());
+                conn.setRequestMethod(method);
             } catch (ProtocolException e) {
                 throw new HttpError(e).setErrorMessage("设置Http Method异常");
             }
@@ -214,7 +215,7 @@ abstract class HttpTask<T> implements Runnable {
         }
     }
 
-    protected abstract Method getMethod();
+    protected abstract String getMethod();
 
     protected abstract void request(final HttpURLConnection conn, final Request<T> request) throws HttpError;
 

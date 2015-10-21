@@ -15,8 +15,8 @@ public class PostTask<T> extends HttpTask<T> {
     }
 
     @Override
-    protected Method getMethod() {
-        return Method.POST;
+    protected String getMethod() {
+        return "POST";
     }
 
     @Override
