@@ -1,11 +1,10 @@
 package lite.httpsupport.impl;
 
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import lite.httpsupport.IHttpListener;
 import lite.httpsupport.IHttpSupport;
+import lite.httpsupport.IThreadPoolFactory;
 import lite.tool.log.ILogger;
 import lite.tool.log.ILogger.Level;
 import lite.tool.log.LogUtils;
@@ -13,17 +12,14 @@ import lite.tool.log.LogUtils;
 public class HttpSupport implements IHttpSupport {
     static final String TAG = "HttpSupport";
 
-    private static final int CPU_COUNT = Runtime.getRuntime()
-            .availableProcessors();
-    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
-    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
-
     private volatile static HttpSupport instance = null;
+    private IThreadPoolFactory threadPoolFactory;
     private volatile ThreadPoolExecutor executor = null;
 
     private boolean debug = false;
 
     public HttpSupport() {
+        threadPoolFactory = new ThreadPoolFactory();
     }
 
     public static HttpSupport getDefault() {
@@ -42,15 +38,19 @@ public class HttpSupport implements IHttpSupport {
         if (null == executor || executor.isShutdown()) {
             synchronized (this) {
                 if (null == executor || executor.isShutdown()) {
-                    executor = new ThreadPoolExecutor(CORE_POOL_SIZE,
-                            MAXIMUM_POOL_SIZE, 1, TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<Runnable>(10),
-                            new MyThreadFactory());
+                    executor = threadPoolFactory.newExecutor();
                 }
             }
         }
 
         return executor;
+    }
+
+    @Override
+    public void setThreadPoolFactory(IThreadPoolFactory factory) {
+        if (null != factory) {
+            this.threadPoolFactory = factory;
+        }
     }
 
     @Override
@@ -100,12 +100,12 @@ public class HttpSupport implements IHttpSupport {
     private void check(final boolean illegal) {
         if (illegal) {
             final IllegalArgumentException e = new IllegalArgumentException(
-                    "参数错误");
+                    "illegal argument");
 
             if (debug) {
                 throw e;
             } else {
-                LogUtils.e(TAG, "check(boolean)", e);
+                LogUtils.e(TAG, "check", e);
             }
         }
     }

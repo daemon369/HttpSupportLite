@@ -58,7 +58,7 @@ abstract class HttpTask<T> implements Runnable {
 
         try {
             if (null == request) {
-                throw new HttpError().setErrorMessage("请求为空：" + request);
+                throw new HttpError().setErrorMessage("request is null");
             }
 
             final URL url;
@@ -66,7 +66,8 @@ abstract class HttpTask<T> implements Runnable {
                 url = new URL(request.getUrl());
                 LogUtils.d(TAG, "url: " + url);
             } catch (MalformedURLException e) {
-                throw new HttpError(e).setErrorMessage("URL非法：" + request.getUrl() + " " + e.getMessage());
+                throw new HttpError(e).setErrorMessage("URL非法："
+                        + request.getUrl() + " " + e.getMessage());
             }
 
             while (true) {
@@ -77,14 +78,22 @@ abstract class HttpTask<T> implements Runnable {
 
                 } catch (HttpError err) {
                     if (!request.isRetry()) {
-                        LogUtils.e(TAG, request + " 请求失败，不进行重试：" + err.getErrorMessage());
+                        LogUtils.e(
+                                TAG,
+                                request + " 请求失败，不进行重试："
+                                        + err.getErrorMessage());
                         throw err;
                     } else if (retryTimes++ >= request.getMaxRetryTimes()) {
                         // 超过最大重试次数
-                        LogUtils.e(TAG, request + " 请求失败：" + err.getErrorMessage() + " 超过最大重试次数：" + request.getMaxRetryTimes());
+                        LogUtils.e(
+                                TAG,
+                                request + " 请求失败：" + err.getErrorMessage()
+                                        + " 超过最大重试次数："
+                                        + request.getMaxRetryTimes());
                         throw err;
                     } else {
-                        LogUtils.w(TAG, request + " 第[" + retryTimes + "]次重试：" + err.getErrorMessage());
+                        LogUtils.w(TAG, request + " 第[" + retryTimes + "]次重试："
+                                + err.getErrorMessage());
                     }
                 }
             }
@@ -98,7 +107,8 @@ abstract class HttpTask<T> implements Runnable {
             // 请求失败或返回不成功
             LogUtils.e(TAG, request + " 请求失败，未正确处理的异常：", e);
 
-            final HttpError err = new HttpError(e).setErrorMessage("未正确处理的异常：" + e.getMessage());
+            final HttpError err = new HttpError(e).setErrorMessage("未正确处理的异常："
+                    + e.getMessage());
             handleFailed(err);
         }
     }
@@ -110,7 +120,8 @@ abstract class HttpTask<T> implements Runnable {
             conn = (HttpURLConnection) url.openConnection();
             LogUtils.v(TAG, "url.openConnection 成功");
         } catch (IOException e) {
-            throw new HttpError(e).setErrorMessage("打开Http连接失败：" + e.getMessage());
+            throw new HttpError(e).setErrorMessage("打开Http连接失败："
+                    + e.getMessage());
         }
 
         final String method = getMethod();
@@ -148,20 +159,24 @@ abstract class HttpTask<T> implements Runnable {
             try {
                 code = conn.getResponseCode();
             } catch (IOException e) {
-                throw new HttpError(e).setErrorMessage("获取返回码失败：" + e.getMessage());
+                throw new HttpError(e).setErrorMessage("获取返回码失败："
+                        + e.getMessage());
             }
 
             LogUtils.d(TAG, "response code:" + code);
 
-            if (code != HttpURLConnection.HTTP_OK && code != HttpURLConnection.HTTP_PARTIAL) {
-                throw new HttpError().setHttpCode(code).setErrorMessage("返回码为：" + code);
+            if (code != HttpURLConnection.HTTP_OK
+                    && code != HttpURLConnection.HTTP_PARTIAL) {
+                throw new HttpError().setHttpCode(code).setErrorMessage(
+                        "返回码为：" + code);
             }
 
             final InputStream in;
             try {
                 in = conn.getInputStream();
             } catch (IOException e) {
-                throw new HttpError(e).setHttpCode(code).setErrorMessage("getInputStream：" + e.getMessage());
+                throw new HttpError(e).setHttpCode(code).setErrorMessage(
+                        "getInputStream：" + e.getMessage());
             }
 
             try {
@@ -176,7 +191,8 @@ abstract class HttpTask<T> implements Runnable {
                             saveStream.write(recvBuffer, 0, len);
                         }
                     } catch (IOException e) {
-                        throw new HttpError(e).setHttpCode(code).setErrorMessage("读取数据失败：" + e.getMessage());
+                        throw new HttpError(e).setHttpCode(code)
+                                .setErrorMessage("读取数据失败：" + e.getMessage());
                     }
 
                     final byte[] responseBuff = saveStream.toByteArray();
@@ -189,10 +205,12 @@ abstract class HttpTask<T> implements Runnable {
                         if (null != response) {
                             handleSuccess(response);
                         } else {
-                            throw new HttpError().setHttpCode(code).setErrorMessage("解码失败");
+                            throw new HttpError().setHttpCode(code)
+                                    .setErrorMessage("解码失败");
                         }
                     } catch (Exception e) {
-                        throw new HttpError(e).setHttpCode(code).setErrorMessage("解码失败");
+                        throw new HttpError(e).setHttpCode(code)
+                                .setErrorMessage("解码失败");
                     }
 
                 } finally {
@@ -217,7 +235,8 @@ abstract class HttpTask<T> implements Runnable {
 
     protected abstract String getMethod();
 
-    protected abstract void request(final HttpURLConnection conn, final Request<T> request) throws HttpError;
+    protected abstract void request(final HttpURLConnection conn,
+            final Request<T> request) throws HttpError;
 
     protected void handleSuccess(final T o) {
         try {

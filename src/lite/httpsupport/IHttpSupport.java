@@ -6,6 +6,8 @@ import lite.tool.log.ILogger.Level;
 
 public interface IHttpSupport {
 
+    void setThreadPoolFactory(final IThreadPoolFactory factory);
+
     void setDebug(final boolean debug);
 
     boolean isDebug();
