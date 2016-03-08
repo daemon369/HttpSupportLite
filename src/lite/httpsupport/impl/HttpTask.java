@@ -22,7 +22,6 @@ abstract class HttpTask<T> implements Runnable {
     private byte[] recvBuffer;
     private int retryTimes = 0;
 
-    private final static String USER_AGENT = "Android";
     private final static String PRAGMA = "no-cache";
     private final static String ACCEPT_LANGUAGE = "zh-CN";
     private final static String ACCEPT = "*/*";
@@ -46,7 +45,6 @@ abstract class HttpTask<T> implements Runnable {
         conn.setReadTimeout(READWIRTE_TIMEOUT);
         conn.setUseCaches(false);
         conn.setInstanceFollowRedirects(true);
-        conn.setRequestProperty("User-Agent", USER_AGENT);
         conn.setRequestProperty("Pragma", PRAGMA);
         conn.setRequestProperty("Accept-Language", ACCEPT_LANGUAGE);
         conn.setRequestProperty("Accept", ACCEPT);
@@ -63,11 +61,11 @@ abstract class HttpTask<T> implements Runnable {
 
             final URL url;
             try {
-                url = new URL(request.getUrl());
+                url = new URL(request.url);
                 LogUtils.d(TAG, "url: " + url);
             } catch (MalformedURLException e) {
-                throw new HttpError(e).setErrorMessage("URL非法："
-                        + request.getUrl() + " " + e.getMessage());
+                throw new HttpError(e).setErrorMessage("URL非法：" + request.url
+                        + " " + e.getMessage());
             }
 
             while (true) {
@@ -83,13 +81,11 @@ abstract class HttpTask<T> implements Runnable {
                                 request + " 请求失败，不进行重试："
                                         + err.getErrorMessage());
                         throw err;
-                    } else if (retryTimes++ >= request.getMaxRetryTimes()) {
+                    } else if (retryTimes++ >= request.maxRetryTimes) {
                         // 超过最大重试次数
-                        LogUtils.e(
-                                TAG,
+                        LogUtils.e(TAG,
                                 request + " 请求失败：" + err.getErrorMessage()
-                                        + " 超过最大重试次数："
-                                        + request.getMaxRetryTimes());
+                                        + " 超过最大重试次数：" + request.maxRetryTimes);
                         throw err;
                     } else {
                         LogUtils.w(TAG, request + " 第[" + retryTimes + "]次重试："
@@ -149,6 +145,9 @@ abstract class HttpTask<T> implements Runnable {
             for (String headerName : map.keySet()) {
                 conn.addRequestProperty(headerName, map.get(headerName));
             }
+
+            LogUtils.d(TAG, "user agent: " + request.userAgent);
+            conn.setRequestProperty("User-Agent", request.userAgent);
 
             setRequestProperty(conn);
 

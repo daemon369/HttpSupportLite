@@ -4,15 +4,20 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
+import android.text.TextUtils;
+
 public abstract class Request<T> {
+    public final static String DEFAULT_USER_AGENT = "Android";
     private static final String DEFAULT_ENCODING = "UTF-8";
     public static final int MAX_RETRY_TIMES = 3;
 
-    final String uuid;
-    final String url;
+    public final String uuid;
+    public final String url;
     boolean retry;
     int maxRetryTimes = MAX_RETRY_TIMES;
     Object tag;
+
+    String userAgent;
 
     public Request(final String url) {
         this.uuid = UUID.randomUUID().toString();
@@ -23,12 +28,22 @@ public abstract class Request<T> {
         return Collections.emptyMap();
     }
 
+    public final Request<T> setUserAgent(final String userAgent) {
+        if (null == userAgent || TextUtils.isEmpty(userAgent.trim())) {
+            this.userAgent = DEFAULT_USER_AGENT;
+        } else {
+            this.userAgent = userAgent;
+        }
+        return this;
+    }
+
     protected String getParamsEncoding() {
         return DEFAULT_ENCODING;
     }
 
     public String getBodyContentType() {
-        return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
+        return "application/x-www-form-urlencoded; charset="
+                + getParamsEncoding();
     }
 
     public byte[] getBody() throws Exception {
@@ -41,14 +56,6 @@ public abstract class Request<T> {
         return httpError;
     }
 
-    public String getUUID() {
-        return uuid;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
     public boolean isRetry() {
         return retry;
     }
@@ -56,10 +63,6 @@ public abstract class Request<T> {
     public Request<T> setRetry(boolean retry) {
         this.retry = retry;
         return this;
-    }
-
-    public int getMaxRetryTimes() {
-        return maxRetryTimes;
     }
 
     public Request<T> setMaxRetryTimes(int maxRetryTimes) {
