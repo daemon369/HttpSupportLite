@@ -24,8 +24,8 @@ public class ImageRequest extends Request<Bitmap> {
             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length,
                     decodeOptions);
         } catch (OutOfMemoryError err) {
-            throw new Exception("parse image encounter OutOfMemoryError:"
-                    + getUrl(), err);
+            throw new Exception(
+                    "parse image encounter OutOfMemoryError:" + url, err);
         }
 
         return bitmap;
