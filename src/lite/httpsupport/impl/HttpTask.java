@@ -136,7 +136,7 @@ abstract class HttpTask<T> implements Runnable {
             try {
                 final Map<String, String> headers = request.getHeaders();
                 if (null != headers) {
-                    map.putAll(request.getHeaders());
+                    map.putAll(headers);
                 }
             } catch (Exception e) {
                 LogUtils.w(TAG, e);

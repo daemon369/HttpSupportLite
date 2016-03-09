@@ -1,6 +1,5 @@
 package lite.httpsupport.impl;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,7 +14,6 @@ public abstract class Request<T> {
     public final String url;
     boolean retry;
     int maxRetryTimes = MAX_RETRY_TIMES;
-    Object tag;
 
     String userAgent;
 
@@ -25,7 +23,7 @@ public abstract class Request<T> {
     }
 
     public Map<String, String> getHeaders() throws Exception {
-        return Collections.emptyMap();
+        return null;
     }
 
     public final Request<T> setUserAgent(final String userAgent) {
@@ -52,10 +50,6 @@ public abstract class Request<T> {
 
     abstract protected T parseResponse(final byte[] data) throws Exception;
 
-    protected HttpError parseNetworkError(HttpError httpError) {
-        return httpError;
-    }
-
     public boolean isRetry() {
         return retry;
     }
@@ -67,15 +61,6 @@ public abstract class Request<T> {
 
     public Request<T> setMaxRetryTimes(int maxRetryTimes) {
         this.maxRetryTimes = maxRetryTimes;
-        return this;
-    }
-
-    public Object getTag() {
-        return tag;
-    }
-
-    public Request<T> setTag(Object tag) {
-        this.tag = tag;
         return this;
     }
 
