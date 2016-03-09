@@ -15,7 +15,7 @@ public abstract class Request<T> {
     boolean retry;
     int maxRetryTimes = MAX_RETRY_TIMES;
 
-    String userAgent;
+    String userAgent = DEFAULT_USER_AGENT;
 
     public Request(final String url) {
         this.uuid = UUID.randomUUID().toString();
@@ -27,9 +27,7 @@ public abstract class Request<T> {
     }
 
     public final Request<T> setUserAgent(final String userAgent) {
-        if (null == userAgent || TextUtils.isEmpty(userAgent.trim())) {
-            this.userAgent = DEFAULT_USER_AGENT;
-        } else {
+        if (null != userAgent && !TextUtils.isEmpty(userAgent.trim())) {
             this.userAgent = userAgent;
         }
         return this;
