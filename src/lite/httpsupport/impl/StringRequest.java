@@ -1,5 +1,6 @@
 package lite.httpsupport.impl;
 
+import android.text.TextUtils;
 import lite.tool.log.LogUtils;
 
 public class StringRequest extends Request<String> {
@@ -13,8 +14,8 @@ public class StringRequest extends Request<String> {
 
     @Override
     public byte[] getBody() throws Exception {
-        if (null == request) {
-            LogUtils.w(TAG, briefInfo() + " request is null");
+        if (TextUtils.isEmpty(request)) {
+            LogUtils.w(TAG, briefInfo() + " request string is empty");
             return null;
         }
 

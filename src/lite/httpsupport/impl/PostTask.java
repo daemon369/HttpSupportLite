@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
-import lite.tool.log.LogUtils;
-
 public class PostTask<T> extends HttpTask<T> {
 
-    private static final String TAG = "PostTask";
+    // private static final String TAG = "PostTask";
 
     public PostTask(Request<T> request) {
         super(request);
@@ -39,9 +37,9 @@ public class PostTask<T> extends HttpTask<T> {
             final OutputStream out;
             try {
                 out = conn.getOutputStream();
-                LogUtils.d(TAG, "output stream is ready");
+                // LogUtils.d(TAG, "output stream is ready");
             } catch (IOException e) {
-                throw new HttpError(e).setErrorMessage("net error");
+                throw new HttpError(e).setErrorMessage("network error");
             }
 
             try {

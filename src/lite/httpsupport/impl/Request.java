@@ -6,9 +6,11 @@ import java.util.UUID;
 import android.text.TextUtils;
 
 public abstract class Request<T> {
+
     public final static String DEFAULT_USER_AGENT = "Android";
-    private static final String DEFAULT_ENCODING = "UTF-8";
-    public static final int MAX_RETRY_TIMES = 3;
+    public final static int DEFAULT_CONNECT_TIMEOUT = 25 * 1000;
+    private final static String DEFAULT_ENCODING = "UTF-8";
+    public final static int MAX_RETRY_TIMES = 3;
 
     public final String uuid;
     public final String url;
@@ -16,6 +18,7 @@ public abstract class Request<T> {
     int maxRetryTimes = MAX_RETRY_TIMES;
 
     String userAgent = DEFAULT_USER_AGENT;
+    int connectTimeout = DEFAULT_CONNECT_TIMEOUT;
 
     public Request(final String url) {
         this.uuid = UUID.randomUUID().toString();
@@ -29,6 +32,13 @@ public abstract class Request<T> {
     public final Request<T> setUserAgent(final String userAgent) {
         if (null != userAgent && !TextUtils.isEmpty(userAgent.trim())) {
             this.userAgent = userAgent;
+        }
+        return this;
+    }
+
+    public final Request<T> setConnectTimeout(final int connectTimeout) {
+        if (connectTimeout > 0) {
+            this.connectTimeout = connectTimeout;
         }
         return this;
     }

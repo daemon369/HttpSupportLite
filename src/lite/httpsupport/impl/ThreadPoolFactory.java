@@ -16,7 +16,7 @@ public class ThreadPoolFactory implements IThreadPoolFactory {
     @Override
     public ThreadPoolExecutor newExecutor() {
         return new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, 1,
-                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(10));
+                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(30));
     }
 
 }
