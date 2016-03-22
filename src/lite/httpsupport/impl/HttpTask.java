@@ -42,6 +42,10 @@ abstract class HttpTask<T> implements Runnable {
         return this;
     }
 
+    public IHttpListener<T> getHttpListener() {
+        return this.listener;
+    }
+
     protected void setRequestProperty(final HttpURLConnection conn) {
         conn.setReadTimeout(READWIRTE_TIMEOUT);
         conn.setUseCaches(false);
